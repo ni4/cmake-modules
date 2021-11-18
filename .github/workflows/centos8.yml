@@ -1,0 +1,34 @@
+name: centos8
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    container:
+      image: centos:8
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+    name: Check FindOpenSSLfeatures
+    steps:
+      - run: |
+          yum -y install git
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Check FindOpenSSLFeatures.cmake
+        run: |
+          set -eux
+          mkdir "${GITHUB_WORKSPACE}/build"
+          pushd "${GITHUB_WORKSPACE}/build"
+          cmake "${GITHUB_WORKSPACE}/ci/findossl"
+          cmake --build "${GITHUB_WORKSPACE}/ci/findossl"
+
